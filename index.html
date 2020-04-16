@@ -22,7 +22,7 @@
     function openShareAPI ({ conversation, message, comment }) {
       navigator.share({
         title: conversation.subject,
-        text: (message||{}).preview || (comment||{}).body || conversation.subject || (conversation.latest_message||{}).preview,
+        text: (message||{}).preview || (comment||{}).body || (/^(iP|Mac)/.test(navigator.platform) && conversation.subject) || (conversation.latest_message||{}).preview,
         url: conversation.link,
       })
       .catch(err => {
