@@ -1,0 +1,44 @@
+<html lang="en">
+<head>
+  <title>Mobile Share Integration for Missive, by Luke Abbott</title>
+  <script src="https://integrations.missiveapp.com/missive.js"></script>
+  <link href="https://integrations.missiveapp.com/missive.css" rel="stylesheet">
+</head>
+<body>
+  <main class="padding content-grow content-vertical">
+    <div id="errorDisplay" class="align-center padding-small">
+      Sharing now available in context menus. No need to have this sidebar open.
+    </div>
+  </main>
+  <script type="text/javascript">
+    // the strings can be localized with url params (examples below)
+    var urlParams = new URLSearchParams(window.location.search);
+    var strShare = urlParams.get('strShare') || 'Share';     // ...?strShare=Partager
+
+    var errorDisplay = document.getElementById("errorDisplay");
+
+    window.onerror = (err) => errorDisplay.innerHTML = err;
+
+    function openShareAPI ({ conversation, message, comment }) {
+      navigator.share({
+        title: conversation.subject,
+        text: (message||{}).preview || (comment||{}).body || conversation.subject || (conversation.latest_message||{}).preview,
+        url: conversation.link,
+      })
+      .catch(err => {
+        if ( err.name !== "AbortError" ) errorDisplay.innerHTML = `${err.name}: ${err.message}`;
+      });
+    }
+
+    if ( !("share" in window.navigator) ) {
+      errorDisplay.innerHTML = "Share API not available on this platform."
+    } else {
+      Missive.setActions([{
+        contexts: ['conversation', 'message', 'comment'],
+        label: strShare,
+        callback: openShareAPI
+      }]);
+    }
+  </script>
+</body>
+</html>
